@@ -1,0 +1,8 @@
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src *; img-src * data: blob:; font-src * data:; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline';"
+    Access-Control-Allow-Origin = "*"
+
+[functions]
+  directory = "netlify/functions"
