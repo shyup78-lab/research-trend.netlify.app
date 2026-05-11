@@ -691,13 +691,16 @@ doRefresh();
 async function fetchTrending(){
   try{
     const r=await fetch('/.netlify/functions/trending');
-    if(!r.ok)throw new Error(r.status);
+    if(!r.ok)throw new Error('HTTP '+r.status);
     const d=await r.json();
-    if(!d.items?.length)throw new Error('empty');
+    if(!d.items||d.items.length===0)throw new Error('empty');
     DATA.trending.items=d.items;
-    DATA.trending.sources=['Wikipedia 한국어 · '+d.date+' 기준'];
+    DATA.trending.sources=[d.source||'Wikipedia 한국어'];
     if(currentCat==='trending')doRefresh();
-  }catch(e){ console.warn('trending 실패, 폴백 유지:', e.message); }
+    console.log('급상승 업데이트 완료:', d.items.length+'개', d.source);
+  }catch(e){
+    console.warn('trending 실패:', e.message);
+  }
 }
 
 async function fetchNews(){
