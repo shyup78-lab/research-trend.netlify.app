@@ -981,7 +981,7 @@ function loadComments(postKey) {
       const t = c.ts ? new Date(c.ts).toLocaleDateString('ko-KR', {month:'2-digit', day:'2-digit'}) + ' ' +
         new Date(c.ts).toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'}) : '';
       const isMine = c.uid === myId;
-      const delBtn = isMine ? '<span class="comment-del" onclick="deleteComment('' + postKey + '','' + k + '')">삭제</span>' : '';
+      const delBtn = isMine ? '<span class="comment-del" onclick="deleteComment(&quot;' + postKey + '&quot;,&quot;' + k + '&quot;)">삭제</span>' : '';
       return '<div class="comment-item">' +
         '<div class="comment-header"><span class="comment-nick">' + c.nick + '</span>' +
         '<span style="display:flex;align-items:center"><span class="comment-date">' + t + '</span>' + delBtn + '</span></div>' +
