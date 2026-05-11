@@ -46,7 +46,7 @@ exports.handler = async function(event) {
         
         if (res.code === 200) {
           var data = JSON.parse(res.body);
-          var skip = ['대한민국', '위키백과', '특수:', '사용자:', '메인_페이지', '틀:', '분류:', '포털:'];
+          var skip = ['대한민국', '위키백과', '특수:', '사용자:', '메인_페이지', '틀:', '분류:', '포털:', '파일:', 'File:', 'Hamster', 'logo', 'svg', 'Logo', 'SVG'];
           var arts = data.items[0].articles.filter(function(a) {
             return !skip.some(function(s) { return a.article.indexOf(s) > -1; });
           }).slice(0, 10);
