@@ -732,11 +732,11 @@ async function fetchStock(){
     const r=await fetch('/.netlify/functions/stock');
     if(!r.ok)throw new Error(r.status);
     const d=await r.json();
-    if(!d.items?.length)throw new Error('empty');
+    if(!d.items||d.items.length===0)throw new Error('empty');
     DATA.stock.items=d.items;
-    DATA.stock.sources=['네이버 금융 · '+d.updatedAt+(d.marketStatus?' ('+d.marketStatus+')':'')];
+    DATA.stock.sources=[d.source||'KRX 거래량 상위'];
     if(currentCat==='stock')doRefresh();
-    console.log('✅ 주식 업데이트 완료');
+    console.log('✅ 주식 업데이트 완료:', d.source);
   }catch(e){ console.warn('stock 실패, 폴백 유지:', e.message); }
 }
 
