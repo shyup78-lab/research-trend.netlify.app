@@ -856,11 +856,7 @@ window._fbSendMessage=function(){
 // 게시판
 const postsRef=ref(db,'posts');
 const recentPostsRef=query(postsRef,limitToLast(200));
-let postsLoaded=false;
-
 function loadPosts(){
-  if(postsLoaded)return;
-  postsLoaded=true;
   onValue(recentPostsRef,snap=>{
     if(!snap.exists()){allPosts=[];filteredPosts=[];renderPage();return;}
     allPosts=Object.entries(snap.val()).map(([k,v])=>({key:k,...v})).reverse();
