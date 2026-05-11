@@ -103,6 +103,25 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
   border-radius: 3px;
 }
 
+
+/* 댓글 */
+.comment-section{padding:14px 16px;border-top:1px solid var(--line);}
+.comment-title{font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px;}
+.comment-list{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;}
+.comment-item{background:var(--bg);border-radius:8px;padding:9px 12px;animation:fadeUp .2s ease;}
+.comment-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+.comment-nick{font-size:11px;font-weight:700;color:var(--red);}
+.comment-date{font-size:10px;color:var(--gray2);font-family:'DM Mono',monospace;}
+.comment-body{font-size:13px;color:var(--text);line-height:1.5;word-break:break-all;}
+.comment-del{font-size:10px;color:var(--gray2);cursor:pointer;margin-left:8px;}
+.comment-del:hover{color:var(--red);}
+.comment-input-row{display:flex;gap:6px;align-items:flex-start;}
+.comment-input{flex:1;border:1px solid var(--line);border-radius:8px;padding:8px 11px;font-size:13px;font-family:'Noto Sans KR',sans-serif;color:var(--text);resize:none;height:60px;outline:none;box-sizing:border-box;}
+.comment-input:focus{border-color:var(--red);}
+.comment-submit{padding:8px 12px;border:none;border-radius:8px;background:var(--red);color:#fff;font-size:12px;font-weight:700;font-family:'Noto Sans KR',sans-serif;cursor:pointer;flex-shrink:0;}
+.comment-empty{font-size:12px;color:var(--gray2);text-align:center;padding:12px 0;}
+.comment-count{font-size:11px;color:var(--gray);font-family:'DM Mono',monospace;margin-left:5px;}
+
 .loader{display:flex;flex-direction:column;align-items:center;gap:12px;padding:50px 0;color:var(--gray);font-size:13px;}
 .loader-bar{width:100px;height:2px;background:var(--line);border-radius:2px;overflow:hidden;}
 .loader-bar::after{content:'';display:block;height:100%;width:40%;background:var(--red);animation:slide .9s ease-in-out infinite alternate;}
@@ -680,6 +699,7 @@ document.getElementById('chat-input').addEventListener('keydown',e=>{if(e.key===
 document.getElementById('search-input').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch();});
 
 function sendMessage(){ if(typeof window._fbSendMessage==='function')window._fbSendMessage(); }
+function submitComment(){ if(typeof window._fbSubmitComment==='function')window._fbSubmitComment(); }
 
 /* ═══════════════════════════════════
    실시간 API 연동
@@ -858,10 +878,27 @@ window._fbViewPost=function(key){
     const editForm=isMine?'<div class="edit-form" id="edit-form"><input type="text" id="edit-title" value="'+p.title.replace(/"/g,'&quot;')+'"/><textarea id="edit-body">'+p.body+'</textarea><div class="edit-form-btns"><button class="form-cancel" onclick="closeEditForm()">취소</button><button class="form-submit" onclick="submitEdit()">수정 완료</button></div></div>':'';
     document.getElementById('post-detail-box').innerHTML=
       '<div class="pd-header"><div class="pd-title" id="pd-title-text">'+p.title+'</div><div class="pd-meta"><span class="pd-nick">'+p.nick+'</span><span>'+t+'</span><span>조회 '+((p.views||0)+1)+'</span></div></div>'+
-      '<div class="pd-body" id="pd-body-text">'+p.body+'</div>'+actionBtns+editForm;
+      '<div class="pd-body" id="pd-body-text">'+p.body+'</div>'+actionBtns+editForm+
+      '<div class="comment-section">'+
+        '<div class="comment-title">💬 댓글 <span class="comment-count" id="comment-count"></span></div>'+
+        '<div class="comment-list" id="comment-list"><div class="comment-empty">첫 댓글을 남겨보세요!</div></div>'+
+        '<div class="comment-input-row">'+
+          '<textarea class="comment-input" id="comment-input" placeholder="댓글을 입력하세요..." maxlength="200"></textarea>'+
+          '<button class="comment-submit" onclick="submitComment()">등록</button>'+
+        '</div>'+
+      '</div>';
     set(ref(db,'posts/'+key+'/views'),(p.views||0)+1);
     document.getElementById('board-list-view').style.display='none';
     document.getElementById('board-detail-view').style.display='block';
+    // 댓글 로드
+    loadComments(key);
+    // 댓글 입력창 엔터키
+    const ci = document.getElementById('comment-input');
+    if(ci) {
+      ci.onkeydown = function(e) {
+        if(e.key==='Enter' && !e.shiftKey) { e.preventDefault(); window._fbSubmitComment && window._fbSubmitComment(); }
+      };
+    }
   });
 };
 
@@ -897,7 +934,58 @@ window._fbDeletePost=function(){
   remove(ref(db,'posts/'+key)).then(()=>{alert('삭제되었습니다.');showBoardList();});
 };
 
-// 게시판 탭 클릭 시 로드
+// 댓글
+window._fbSubmitComment = function(){
+  const input = document.getElementById('comment-input');
+  if(!input) return;
+  const text = input.value.trim();
+  if(!text) { alert('댓글을 입력해주세요!'); return; }
+  const key = window._currentPostKey;
+  if(!key) return;
+  const nick = localStorage.getItem('userNick') || '익명';
+  push(ref(db, 'posts/' + key + '/comments'), {
+    uid: myId, nick, text: filter(text), ts: Date.now()
+  }).then(function() {
+    input.value = '';
+  });
+};
+
+function loadComments(postKey) {
+  const commentsRef = ref(db, 'posts/' + postKey + '/comments');
+  onValue(commentsRef, function(snap) {
+    const list = document.getElementById('comment-list');
+    const countEl = document.getElementById('comment-count');
+    if(!list) return;
+    if(!snap.exists()) {
+      list.innerHTML = '<div class="comment-empty">첫 댓글을 남겨보세요!</div>';
+      if(countEl) countEl.textContent = '(0)';
+      return;
+    }
+    const comments = snap.val();
+    const keys = Object.keys(comments);
+    if(countEl) countEl.textContent = '(' + keys.length + ')';
+    list.innerHTML = keys.map(function(k) {
+      const c = comments[k];
+      const t = c.ts ? new Date(c.ts).toLocaleDateString('ko-KR', {month:'2-digit', day:'2-digit'}) + ' ' +
+        new Date(c.ts).toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'}) : '';
+      const isMine = c.uid === myId;
+      const delBtn = isMine ? '<span class="comment-del" onclick="deleteComment('' + postKey + '','' + k + '')">삭제</span>' : '';
+      return '<div class="comment-item">' +
+        '<div class="comment-header"><span class="comment-nick">' + c.nick + '</span>' +
+        '<span style="display:flex;align-items:center"><span class="comment-date">' + t + '</span>' + delBtn + '</span></div>' +
+        '<div class="comment-body">' + c.text + '</div>' +
+        '</div>';
+    }).join('');
+    list.scrollTop = list.scrollHeight;
+  });
+}
+
+window.deleteComment = function(postKey, commentKey) {
+  if(!confirm('댓글을 삭제하시겠습니까?')) return;
+  remove(ref(db, 'posts/' + postKey + '/comments/' + commentKey));
+};
+
+// 게시글 탭 클릭 시 로드
 const origShowBoard=window.showBoard;
 window.showBoard=function(){ origShowBoard&&origShowBoard(); loadPosts(); };
 </script>
