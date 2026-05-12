@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>대한민국 인기 트렌드 보드</title>
+<title>대한민국 인기 트렌드</title>
 <meta name="description" content="공개 데이터 기반 인기 트렌드 정보 서비스">
 <meta name="theme-color" content="#ED3024">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="트렌드보드">
+<meta name="apple-mobile-web-app-title" content="인기트렌드">
 <link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="/icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -280,7 +280,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 <div class="hdr">
   <div class="hdr-in">
     <div class="hdr-top">
-      <h1 class="site-title">대한민국 인기 트렌드 보드</h1>
+      <h1 class="site-title">대한민국 인기 트렌드</h1>
       <div class="hdr-right">
         <div class="vis-pill">
           <span class="vdot"></span>
@@ -297,8 +297,8 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
       </div>
     </div>
     <div class="tabs-wrap" id="tabs">
-      <button class="tab-board" id="board-tab" onclick="showBoard()">📋 게시판</button>
-      <button class="tab active" data-cat="wiki">🌐 위키 인기</button>
+      <button class="tab-board active" id="board-tab" onclick="showBoard()">📋 게시판</button>
+      <button class="tab" data-cat="wiki">🌐 위키 인기</button>
     </div>
   </div>
 </div>
@@ -307,8 +307,8 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
   <!-- 정책 페이지 -->
   <div id="policy-section" class="policy-section"></div>
   
-  <!-- 순위 영역 -->
-  <div id="rank-area">
+  <!-- 순위 영역 (처음엔 숨김) -->
+  <div id="rank-area" style="display:none;">
     <div class="disclaimer-banner" id="disclaimer-banner">
       <strong>ℹ️ 안내:</strong> 본 정보는 <strong>공개 데이터를 기반으로 한 참고용</strong>입니다. 어떠한 투자 권유나 추천이 아니며, 정확성을 보장하지 않습니다.
     </div>
@@ -326,8 +326,8 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
     </div>
   </div>
 
-  <!-- 게시판 영역 -->
-  <div id="board-area" class="board-wrap">
+  <!-- 게시판 영역 (처음에 보임) -->
+  <div id="board-area" class="board-wrap" style="display:block;">
     <div id="board-list-view">
       <div class="board-top-row">
         <div class="board-label">📋 자유게시판</div>
@@ -376,7 +376,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 </div>
 
 <!-- 채팅 -->
-<div class="chat-section" id="chat-section">
+<div class="chat-section" id="chat-section" style="display:none;">
   <div class="chat-header">
     <div class="chat-title">💬 실시간 익명 채팅</div>
     <span class="chat-online" id="chat-online">로딩 중...</span>
@@ -507,7 +507,7 @@ const policies = {
     title: '이용약관',
     content: `
       <h3>제1조 (목적)</h3>
-      <p>본 약관은 "대한민국 인기 트렌드 보드"(이하 "본 서비스")의 이용에 관한 조건을 규정합니다.</p>
+      <p>본 약관은 "대한민국 인기 트렌드"(이하 "본 서비스")의 이용에 관한 조건을 규정합니다.</p>
       <h3>제2조 (서비스의 성격)</h3>
       <ul>
         <li>본 서비스는 공개된 데이터를 기반으로 한 비상업적 개인 프로젝트입니다.</li>
@@ -922,7 +922,8 @@ function filter(t){
    실시간 API 연동 (안전한 출처만)
 ═══════════════════════════════════ */
 ['wiki'].forEach(cat=>{ setFallback(cat); });
-doRefresh();
+// 초기에는 게시판이 보이므로 doRefresh() 호출 안 함
+// 위키 데이터는 fetchWiki()로 백그라운드 미리 가져오기
 
 // 위키피디아 한국어 인기 문서 (공식 API, CC BY-SA)
 async function fetchWiki(){
@@ -1216,6 +1217,9 @@ window.deleteComment = function(postKey, commentKey) {
 // 게시글 탭 클릭 시 로드
 const origShowBoard=window.showBoard;
 window.showBoard=function(){ origShowBoard&&origShowBoard(); loadPosts(); };
+
+// 페이지 처음 로드 시 게시판 자동 로드 (시작 화면이 게시판이므로)
+loadPosts();
 </script>
 <script>
 if('serviceWorker' in navigator){
