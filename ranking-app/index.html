@@ -251,6 +251,18 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 .footer-links a:hover{color:var(--red);}
 .footer-disclaimer{font-size:9px;color:#bbb;line-height:1.7;margin-top:10px;padding:0 8px;}
 
+/* ADMIN MODE */
+.admin-badge{display:none;align-items:center;gap:3px;background:#FFE082;border:1px solid #F9A825;border-radius:20px;padding:2px 7px;font-size:9px;color:#5D4037;font-weight:700;margin-left:6px;vertical-align:middle;}
+body.admin-mode .admin-badge{display:inline-flex;}
+.admin-del-btn{display:none;background:#FF5C5C;color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;font-family:'Noto Sans KR',sans-serif;cursor:pointer;margin-left:6px;}
+body.admin-mode .admin-del-btn{display:inline-block;}
+.admin-del-btn:hover{background:#C4200F;}
+.admin-del-inline{display:none;font-size:10px;color:#FF5C5C;cursor:pointer;padding:0 4px;font-weight:700;margin-left:4px;background:none;border:none;font-family:'Noto Sans KR',sans-serif;}
+body.admin-mode .admin-del-inline{display:inline-block;}
+.admin-del-inline:hover{color:#C4200F;}
+.admin-toast{position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#FFE082;border:2px solid #F9A825;border-radius:20px;padding:8px 18px;font-size:12px;font-weight:700;color:#5D4037;z-index:1000;box-shadow:0 4px 12px rgba(0,0,0,.15);animation:slideDownAdmin .3s ease;}
+@keyframes slideDownAdmin{from{opacity:0;transform:translate(-50%,-20px);}to{opacity:1;transform:translate(-50%,0);}}
+
 /* NICK MODAL */
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999;align-items:center;justify-content:center;}
 .modal-bg.open{display:flex;}
@@ -281,7 +293,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 <div class="hdr">
   <div class="hdr-in">
     <div class="hdr-top">
-      <h1 class="site-title">대한민국 인기 트렌드</h1>
+      <h1 class="site-title">대한민국 인기 트렌드<span class="admin-badge">🛡️ ADMIN</span></h1>
       <div class="hdr-right">
         <div class="vis-pill">
           <span class="vdot"></span>
@@ -479,6 +491,29 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 </div>
 
 <script>
+/* ═══════════════════════════════════
+   🛡️ 운영자 모드 감지
+═══════════════════════════════════ */
+const ADMIN_PASS = 'jk.sats';
+const urlParams = new URLSearchParams(window.location.search);
+const adminParam = urlParams.get('admin');
+const isAdmin = (adminParam === ADMIN_PASS);
+
+if(isAdmin){
+  document.body.classList.add('admin-mode');
+  console.log('🛡️ 운영자 모드 활성화');
+  // 토스트 알림
+  const toast = document.createElement('div');
+  toast.className = 'admin-toast';
+  toast.textContent = '🛡️ 운영자 모드로 접속하셨습니다';
+  document.body.appendChild(toast);
+  setTimeout(()=>{ 
+    toast.style.transition='opacity .5s'; 
+    toast.style.opacity='0'; 
+    setTimeout(()=>toast.remove(), 500); 
+  }, 3000);
+}
+
 /* ═══════════════════════════════════
    동의 처리
 ═══════════════════════════════════ */
@@ -1023,6 +1058,7 @@ onValue(recentRef,snap=>{
     div.innerHTML='<div class="chat-msg-top"><span class="chat-nick">'+m.nick+'</span><span class="chat-time">'+t+'</span></div>'+
       '<div class="chat-text-wrap"><span class="chat-text">'+m.text+'</span>'+
       (!isMine?'<span class="chat-msg-report" onclick="reportChat(\''+k+'\')" title="신고">🚨</span>':'')+
+      (isAdmin && !isMine ? '<button class="admin-del-inline" onclick="adminDeleteChat(\''+k+'\')" title="운영자 삭제">🛡️삭제</button>' : '')+
       '</div>';
     c.appendChild(div);
   });
@@ -1074,6 +1110,7 @@ window._fbViewPost=function(key){
     const actionBtns='<div class="pd-actions">'+
       (isMine?'<button class="edit-btn" onclick="openEditForm()">✏️ 수정</button><button class="del-btn" onclick="deletePost()">🗑️ 삭제</button>':'')+
       '<button class="report-btn" onclick="reportPost()">🚨 신고</button>'+
+      (isAdmin && !isMine ? '<button class="admin-del-btn" onclick="adminDeletePost(\''+key+'\')">🛡️ 운영자 삭제</button>' : '')+
       '</div>';
     const editForm=isMine?'<div class="edit-form" id="edit-form"><input type="text" id="edit-title" value="'+p.title.replace(/"/g,'&quot;')+'"/><textarea id="edit-body">'+p.body+'</textarea><div class="edit-form-btns"><button class="form-cancel" onclick="closeEditForm()">취소</button><button class="form-submit" onclick="submitEdit()">수정 완료</button></div></div>':'';
     document.getElementById('post-detail-box').innerHTML=
@@ -1196,8 +1233,10 @@ function loadComments(postKey) {
       const t = c.ts ? new Date(c.ts).toLocaleDateString('ko-KR', {month:'2-digit', day:'2-digit'}) + ' ' +
         new Date(c.ts).toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'}) : '';
       const isMine = c.uid === myId;
+      const adminDelBtn = (isAdmin && !isMine) ? '<button class="admin-del-inline" onclick="adminDeleteComment(&quot;' + postKey + '&quot;,&quot;' + k + '&quot;)" title="운영자 삭제">🛡️삭제</button>' : '';
       const actions = '<span class="comment-actions">' +
         (isMine ? '<span class="comment-del" onclick="deleteComment(&quot;' + postKey + '&quot;,&quot;' + k + '&quot;)">삭제</span>' : '') +
+        adminDelBtn +
         '<span class="comment-report" onclick="reportComment(&quot;' + postKey + '&quot;,&quot;' + k + '&quot;)" title="신고">🚨</span>' +
         '</span>';
       return '<div class="comment-item">' +
@@ -1213,6 +1252,43 @@ function loadComments(postKey) {
 window.deleteComment = function(postKey, commentKey) {
   if(!confirm('댓글을 삭제하시겠습니까?')) return;
   remove(ref(db, 'posts/' + postKey + '/comments/' + commentKey));
+};
+
+// ═══════════════════════════════════
+// 🛡️ 운영자 삭제 함수
+// ═══════════════════════════════════
+window.adminDeletePost = function(key){
+  if(!isAdmin) return;
+  if(!confirm('🛡️ 운영자 권한으로 이 게시글을 삭제합니다.\n정말 삭제하시겠습니까?')) return;
+  remove(ref(db, 'posts/'+key)).then(()=>{
+    alert('🛡️ 운영자 권한으로 삭제 완료');
+    showBoardList();
+  }).catch(err=>{
+    console.error('삭제 오류:', err);
+    alert('삭제 실패: ' + err.message);
+  });
+};
+
+window.adminDeleteComment = function(postKey, commentKey){
+  if(!isAdmin) return;
+  if(!confirm('🛡️ 운영자 권한으로 댓글을 삭제합니다.\n정말 삭제하시겠습니까?')) return;
+  remove(ref(db, 'posts/'+postKey+'/comments/'+commentKey)).then(()=>{
+    console.log('🛡️ 댓글 삭제 완료');
+  }).catch(err=>{
+    console.error('삭제 오류:', err);
+    alert('삭제 실패: ' + err.message);
+  });
+};
+
+window.adminDeleteChat = function(msgKey){
+  if(!isAdmin) return;
+  if(!confirm('🛡️ 운영자 권한으로 채팅 메시지를 삭제합니다.\n정말 삭제하시겠습니까?')) return;
+  remove(ref(db, 'messages/'+msgKey)).then(()=>{
+    console.log('🛡️ 채팅 삭제 완료');
+  }).catch(err=>{
+    console.error('삭제 오류:', err);
+    alert('삭제 실패: ' + err.message);
+  });
 };
 
 // 게시글 탭 클릭 시 로드
