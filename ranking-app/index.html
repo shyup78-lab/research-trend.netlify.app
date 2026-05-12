@@ -29,18 +29,19 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 .hdr-in{max-width:600px;margin:0 auto;padding:0 16px;}
 .hdr-top{display:flex;align-items:center;justify-content:space-between;padding:13px 0 9px;}
 .site-title{font-size:16px;font-weight:900;color:#fff;letter-spacing:-.5px;}
-.hdr-right{display:flex;align-items:center;gap:7px;}
-.vis-pill{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:3px 9px;font-size:10px;color:#fff;}
+.hdr-right{display:flex;align-items:center;gap:5px;}
+.vis-pill{display:flex;align-items:center;gap:3px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:2px 7px;font-size:9px;color:#fff;}
 .vdot{width:5px;height:5px;border-radius:50%;background:#6EF78A;animation:blink 1.5s infinite;}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
-.live-pill{display:flex;align-items:center;gap:4px;border:1px solid rgba(255,255,255,.35);border-radius:20px;padding:3px 9px;font-size:10px;color:#fff;}
+.live-pill{display:flex;align-items:center;gap:3px;border:1px solid rgba(255,255,255,.35);border-radius:20px;padding:2px 7px;font-size:9px;color:#fff;}
 .tabs-wrap{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;padding-bottom:10px;flex-wrap:nowrap;}
 .tabs-wrap::-webkit-scrollbar{display:none}
 .tab{flex-shrink:0;padding:5px 13px;border-radius:20px;border:1px solid rgba(255,255,255,.35);font-size:12px;font-weight:500;font-family:'Noto Sans KR',sans-serif;color:rgba(255,255,255,.65);background:transparent;cursor:pointer;white-space:nowrap;transition:all .15s;}
 .tab:hover{background:rgba(255,255,255,.15);color:#fff;}
 .tab.active{background:#fff;color:var(--red);border-color:#fff;font-weight:700;}
-.tab-board{flex-shrink:0;padding:5px 14px;border-radius:20px;border:2px solid #fff;font-size:12px;font-weight:800;font-family:'Noto Sans KR',sans-serif;color:var(--red);background:#fff;cursor:pointer;white-space:nowrap;transition:all .2s;}
-.tab-board.active{transform:scale(1.05);}
+.tab-board{flex-shrink:0;padding:5px 13px;border-radius:20px;border:1px solid rgba(255,255,255,.35);font-size:12px;font-weight:600;font-family:'Noto Sans KR',sans-serif;color:rgba(255,255,255,.85);background:transparent;cursor:pointer;white-space:nowrap;transition:all .15s;}
+.tab-board:hover{background:rgba(255,255,255,.15);color:#fff;}
+.tab-board.active{background:#fff;color:var(--red);border-color:#fff;font-weight:700;}
 
 /* BODY */
 .body{max-width:600px;margin:0 auto;padding:14px 16px 0;}
@@ -284,14 +285,14 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
       <div class="hdr-right">
         <div class="vis-pill">
           <span class="vdot"></span>
-          <span style="font-size:10px;">실시간</span>
-          <span id="visitor-count" style="font-size:12px;font-weight:700;min-width:14px;text-align:center;">-</span>
-          <span style="font-size:10px;">명</span>
+          <span style="font-size:9px;">실시간</span>
+          <span id="visitor-count" style="font-size:10px;font-weight:700;min-width:12px;text-align:center;">-</span>
+          <span style="font-size:9px;">명</span>
         </div>
         <div class="vis-pill">
-          <span style="font-size:10px;">누적</span>
-          <span id="total-count" style="font-size:12px;font-weight:700;min-width:14px;text-align:center;">-</span>
-          <span style="font-size:10px;">명</span>
+          <span style="font-size:9px;">누적</span>
+          <span id="total-count" style="font-size:10px;font-weight:700;min-width:12px;text-align:center;">-</span>
+          <span style="font-size:9px;">명</span>
         </div>
         <div class="live-pill"><span class="vdot"></span>LIVE</div>
       </div>
