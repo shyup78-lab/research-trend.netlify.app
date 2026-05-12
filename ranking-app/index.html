@@ -299,9 +299,6 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
     <div class="tabs-wrap" id="tabs">
       <button class="tab-board" id="board-tab" onclick="showBoard()">📋 게시판</button>
       <button class="tab active" data-cat="wiki">🌐 위키 인기</button>
-      <button class="tab" data-cat="crypto">₿ 암호화폐</button>
-      <button class="tab" data-cat="movie">🎬 영화</button>
-      <button class="tab" data-cat="game">🎮 게임</button>
     </div>
   </div>
 </div>
@@ -582,13 +579,6 @@ const policies = {
         <li>정보의 정확성·완전성·시의성을 보장하지 않습니다.</li>
         <li>운영자는 본 서비스 이용으로 인한 어떠한 손해에 대해서도 책임지지 않습니다.</li>
       </ul>
-      <h3>💰 투자 정보 면책</h3>
-      <ul>
-        <li>표시되는 암호화폐 등 시세 정보는 <strong>참고용</strong>이며, 어떠한 매수·매도 권유도 아닙니다.</li>
-        <li>본 서비스는 자본시장법상 투자자문업·유사투자자문업이 아닙니다.</li>
-        <li>모든 투자 판단과 그에 따른 손익은 투자자 본인에게 있습니다.</li>
-        <li>표시 가격은 실시간 시장 가격과 차이가 있을 수 있습니다.</li>
-      </ul>
       <h3>📝 게시판·채팅 면책</h3>
       <ul>
         <li>게시판·채팅의 모든 게시물은 작성자 본인의 의견이며, 운영자의 입장과 무관합니다.</li>
@@ -657,10 +647,7 @@ function hidePolicy(){
    데이터
 ═══════════════════════════════════ */
 const DATA = {
-  wiki:   {sources:['Wikipedia 한국어 (CC BY-SA)'],items:[]},
-  crypto: {sources:['Upbit 시세 정보'],items:[]},
-  movie:  {sources:['영화진흥위원회 박스오피스'],items:[]},
-  game:   {sources:['공개 게임 트렌드'],items:[]}
+  wiki: {sources:['Wikipedia 한국어 (CC BY-SA)'],items:[]}
 };
 
 /* 폴백 (실시간 API 실패 시) */
@@ -671,25 +658,11 @@ const FALLBACK = {
     {term:'한국 위키 인기 문서 3',desc:'데이터 로딩 중',change:'same',delta:0},
     {term:'한국 위키 인기 문서 4',desc:'데이터 로딩 중',change:'same',delta:0},
     {term:'한국 위키 인기 문서 5',desc:'데이터 로딩 중',change:'same',delta:0},
-  ],
-  movie:[
-    {term:'박스오피스 1위',desc:'영화진흥위원회',change:'same',delta:0},
-    {term:'박스오피스 2위',desc:'영화진흥위원회',change:'same',delta:0},
-    {term:'박스오피스 3위',desc:'영화진흥위원회',change:'same',delta:0},
-    {term:'박스오피스 4위',desc:'영화진흥위원회',change:'same',delta:0},
-    {term:'박스오피스 5위',desc:'영화진흥위원회',change:'same',delta:0},
-  ],
-  game:[
-    {term:'인기 게임 1',desc:'공개 데이터',change:'same',delta:0},
-    {term:'인기 게임 2',desc:'공개 데이터',change:'same',delta:0},
-    {term:'인기 게임 3',desc:'공개 데이터',change:'same',delta:0},
-    {term:'인기 게임 4',desc:'공개 데이터',change:'same',delta:0},
-    {term:'인기 게임 5',desc:'공개 데이터',change:'same',delta:0},
   ]
 };
 
 let currentCat='wiki', refreshTimer=null, progressTimer=null, progressSec=0;
-const INTERVALS={wiki:3600,crypto:60,movie:3600,game:3600};
+const INTERVALS={wiki:3600};
 
 function badgeHTML(c){
   if(c==='new') return '<span class="badge b-new">NEW</span>';
@@ -731,17 +704,10 @@ function setFallback(cat){
 // 카테고리별 면책 안내
 function updateDisclaimer(cat){
   const banner = document.getElementById('disclaimer-banner');
-  if(cat === 'crypto'){
-    banner.innerHTML = '<strong>⚠️ 투자 유의:</strong> 본 시세 정보는 <strong>참고용</strong>이며, 어떠한 투자 권유나 매매 추천이 아닙니다. 투자 판단과 손익은 투자자 본인에게 있습니다.';
-    banner.style.borderColor = '#FFCDD2';
-    banner.style.background = '#FFEBEE';
-    banner.style.color = '#C62828';
-  } else {
-    banner.innerHTML = '<strong>ℹ️ 안내:</strong> 본 정보는 <strong>공개 데이터를 기반으로 한 참고용</strong>입니다. 정확성·완전성을 보장하지 않습니다.';
-    banner.style.borderColor = '#FFE0B2';
-    banner.style.background = '#FFF8E1';
-    banner.style.color = '#5D4037';
-  }
+  banner.innerHTML = '<strong>ℹ️ 안내:</strong> 본 정보는 <strong>공개 데이터를 기반으로 한 참고용</strong>입니다. 정확성·완전성을 보장하지 않습니다.';
+  banner.style.borderColor = '#FFE0B2';
+  banner.style.background = '#FFF8E1';
+  banner.style.color = '#5D4037';
 }
 
 function doRefresh(){
@@ -773,10 +739,7 @@ function doRefresh(){
       if(progressSec>=interval)clearInterval(progressTimer);
     },1000);
     refreshTimer=setInterval(()=>{
-      if(currentCat==='crypto') fetchCrypto();
-      else if(currentCat==='wiki') fetchWiki();
-      else if(currentCat==='movie') fetchMovie();
-      else if(currentCat==='game') fetchGame();
+      if(currentCat==='wiki') fetchWiki();
     },interval*1000);
   },200);
 }
@@ -958,7 +921,7 @@ function filter(t){
 /* ═══════════════════════════════════
    실시간 API 연동 (안전한 출처만)
 ═══════════════════════════════════ */
-['wiki','movie','game'].forEach(cat=>{ setFallback(cat); });
+['wiki'].forEach(cat=>{ setFallback(cat); });
 doRefresh();
 
 // 위키피디아 한국어 인기 문서 (공식 API, CC BY-SA)
@@ -998,70 +961,13 @@ async function fetchWiki(){
   }
 }
 
-// 암호화폐 (Upbit 공개 시세, 강한 면책)
-async function fetchCrypto(){
-  const names = ['비트코인','이더리움','리플','솔라나','도지코인','에이다','아발란체','체인링크','폴카닷','트론'];
-  const markets = 'KRW-BTC,KRW-ETH,KRW-XRP,KRW-SOL,KRW-DOGE,KRW-ADA,KRW-AVAX,KRW-LINK,KRW-DOT,KRW-TRX';
-  try{
-    const r = await fetch('https://api.upbit.com/v1/ticker?markets='+markets);
-    if(!r.ok) throw new Error(r.status);
-    const data = await r.json();
-    DATA.crypto.items = data.map((t,i) => {
-      const chg = t.signed_change_rate * 100;
-      return {
-        term: names[i] + ' (' + t.market.replace('KRW-','') + ')',
-        desc: '₩' + Math.round(t.trade_price).toLocaleString('ko-KR') + ' / 변동 ' + (chg>=0?'+':'') + chg.toFixed(2) + '%',
-        change: chg > 1 ? 'up' : chg < -1 ? 'down' : 'same',
-        delta: 0,
-        url: 'https://upbit.com/exchange?code=CRIX.UPBIT.' + t.market
-      };
-    });
-    DATA.crypto.sources = ['Upbit · ' + new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})];
-    if(currentCat === 'crypto') doRefresh();
-  } catch(e){
-    console.error('crypto 오류:', e);
-  }
-}
-
-// 영화 박스오피스 (영화진흥위원회 - 정부 공식 데이터)
-async function fetchMovie(){
-  try{
-    // Netlify Function 경유 권장 (CORS 회피 + API 키 보호)
-    const r = await fetch('/.netlify/functions/movies');
-    if(!r.ok) throw new Error('HTTP '+r.status);
-    const d = await r.json();
-    if(!d.items || d.items.length === 0) throw new Error('empty');
-    DATA.movie.items = d.items;
-    DATA.movie.sources = ['영화진흥위원회 (공공데이터)'];
-    if(currentCat === 'movie') doRefresh();
-  } catch(e){
-    console.warn('movie 실패, 폴백 유지:', e.message);
-  }
-}
-
-// 게임 (Steam Charts 공개 데이터)
-async function fetchGame(){
-  try{
-    const r = await fetch('/.netlify/functions/games');
-    if(!r.ok) throw new Error('HTTP '+r.status);
-    const d = await r.json();
-    if(!d.items || d.items.length === 0) throw new Error('empty');
-    DATA.game.items = d.items;
-    DATA.game.sources = ['Steam Charts (공개 데이터)'];
-    if(currentCat === 'game') doRefresh();
-  } catch(e){
-    console.warn('game 실패, 폴백 유지:', e.message);
-  }
-}
+// 암호화폐, 영화, 게임 기능은 법적 안전성을 위해 제거됨
 
 // 초기 로드
-fetchWiki(); fetchCrypto(); fetchMovie(); fetchGame();
+fetchWiki();
 
 // 자동 갱신
 setInterval(fetchWiki, 3600000);    // 1시간
-setInterval(fetchCrypto, 60000);    // 1분
-setInterval(fetchMovie, 3600000);   // 1시간
-setInterval(fetchGame, 3600000);    // 1시간
 </script>
 
 <!-- Firebase -->
